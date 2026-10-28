@@ -29,7 +29,14 @@ Installing or connecting does **not** capture conversations. Optional original-c
 
 ## Updates
 
-For an existing installation, ask Codex to update this marketplace and plugin, or run:
+Ordinary OpenScience changes are central: context, existing and new shared skills,
+supporting resources, and compatible server improvements are available through
+the existing connection. Members do not run a sync job or reinstall the plugin
+for those changes. The installed package is a stable loader for the current
+server and skill catalog.
+
+Only when the installed package itself changes, ask Codex to update this
+marketplace and plugin, or run:
 
 ```sh
 codex plugin marketplace upgrade xu-lab-remote --json
@@ -37,6 +44,9 @@ codex plugin add openscience-validation@xu-lab-remote --json
 ```
 
 The current release is **0.2.0**. Shared context and skills update independently of the package. Browser grants renew for up to two weeks; reconnect normally when sign-in expires.
+
+Changes to optional local capture hooks remain subject to Codex's native trust
+review. Installing or updating the package never opts a computer into capture.
 
 ## Storage and migration
 

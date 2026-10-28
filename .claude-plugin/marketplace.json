@@ -1,0 +1,14 @@
+{
+  "name": "xu-lab-claude",
+  "description": "Xu Lab OpenScience for Claude Code",
+  "owner": {
+    "name": "Xu Lab"
+  },
+  "plugins": [
+    {
+      "name": "openscience-remote",
+      "source": "./plugins/openscience-remote",
+      "description": "Shared Xu Lab context, original evidence, figures, and attributed contributions"
+    }
+  ]
+}

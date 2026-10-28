@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "openscience": {
+      "type": "http",
+      "url": "https://mcp.xu-lab.net/mcp"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "openscience-remote",
+  "displayName": "OpenScience Remote",
+  "version": "0.2.0",
+  "author": {
+    "name": "Xu Lab"
+  },
+  "description": "Shared Xu Lab context, original evidence, figures, and attributed contributions",
+  "homepage": "https://github.com/xulab2d/openscience-plugins",
+  "repository": "https://github.com/xulab2d/openscience-plugins"
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "openscience-validation",
+  "version": "0.2.0-preview.3",
+  "author": {
+    "name": "Xu Lab"
+  },
+  "description": "Shared Xu Lab context, original evidence, figures, and attributed contributions",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "OpenScience Validation",
+        "shortDescription": "Connect to the lab's shared context and evidence"
+      }
+    }
+  }
+}

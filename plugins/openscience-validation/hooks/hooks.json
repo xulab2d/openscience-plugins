@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${PLUGIN_ROOT}/scripts/capture_client.py\" --hook",
+            "timeout": 600,
+            "async": true,
+            "statusMessage": "Archiving opted-in lab conversation evidence"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${PLUGIN_ROOT}/scripts/capture_client.py\" --hook --dispatch",
+            "timeout": 3
+          }
+        ]
+      }
+    ]
+  }
+}

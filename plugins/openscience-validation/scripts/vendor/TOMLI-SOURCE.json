@@ -1,0 +1,8 @@
+{
+  "name": "tomli",
+  "version": "2.4.0",
+  "source": "https://files.pythonhosted.org/packages/23/d1/136eb2cb77520a31e1f64cbae9d33ec6df0d78bdf4160398e86eec8a8754/tomli-2.4.0-py3-none-any.whl",
+  "sha256": "1f776e7d669ebceb01dee46484485f43a4048746235e683bcdffacdf1fb4785a",
+  "license": "MIT",
+  "purpose": "Python 3.9/3.10 TOML compatibility; pure Python wheel from PyPI"
+}

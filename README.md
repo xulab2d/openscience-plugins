@@ -29,6 +29,8 @@ In Claude Code, run:
 
 Then open `/mcp`, select the plugin's OpenScience connection, and choose **Authenticate**. Sign in with your authorized lab email. The Claude marketplace is `xu-lab-claude`; its package is `openscience-remote`. This is a separate client package for the same shared service. Current Claude Code is required; the installation and server discovery were validated with version 2.1.312.
 
+Version 0.2.1 adds native transfers for explicitly requested original files, with resumable uploads/downloads and verified checksums. File bytes pass through the saved MCP connection without entering the model context. The optional `/openscience-file` command uses the same transfer handler. This local helper needs Python 3.9+ and normal Claude tool permissions; see the [Claude package instructions](plugins/openscience-remote/README.md). Browser downloads of existing originals do not require the helper.
+
 ## Claude on web, desktop and phone
 
 Open **Customize → Connectors → Add → Add custom connector** in Claude:
@@ -46,7 +48,7 @@ The Codex Git installation above does not itself create an account-level ChatGPT
 
 Do this in your own ChatGPT account—the one you use on your phone. Your ChatGPT account and your OpenScience lab identity are separate: use your approved lab email at the OpenScience sign-in screen. A connection installed in the shared lab ChatGPT account does not install it in anyone's personal account. Then select OpenScience Remote on your phone using that same personal ChatGPT account. Availability also depends on your account/workspace's plugin permissions. [Custom MCP setup](https://developers.openai.com/api/docs/guides/custom-mcp-server) · [Plugin availability across devices](https://learn.chatgpt.com/docs/plugins).
 
-### Stanford Claude accounts
+## Stanford Claude accounts
 
 Stanford's managed Claude workspace requires an administrator to add a new remote connector. Installing the plugin's skills does not bypass that requirement. Request **OpenScience Remote**, URL `https://mcp.xu-lab.net/mcp`, with **OAuth → Register automatically** through [Stanford's Claude connector request](https://stanford.service-now.com/it_services?id=sc_cat_item&sys_id=4a36a9363b148bd08b33f9ac24e45abe). Once approved, lab members connect individually with their authorized lab identity; Stanford-wide installation does not grant Stanford-wide access to lab data. See [Stanford's connector process](https://uit.stanford.edu/ai/connectors).
 
@@ -80,7 +82,7 @@ codex plugin marketplace upgrade xu-lab-remote --json
 codex plugin add openscience-validation@xu-lab-remote --json
 ```
 
-The current release is **0.2.0**. Shared context and skills update independently of the package. Claude Code's third-party package auto-update is off by default; it can be enabled for `xu-lab-claude` under **/plugin → Marketplaces**. This setting affects the installed loader, not the live private skill catalog. Browser grants renew for up to two weeks; reconnect normally when sign-in expires.
+The current Codex package is **0.2.0** and the Claude Code package is **0.2.1**. Shared context and skills update independently of those packages. Claude Code's third-party package auto-update is off by default; it can be enabled for `xu-lab-claude` under **/plugin → Marketplaces**. This setting affects the installed loader, not the live private skill catalog. Browser grants renew for up to two weeks; reconnect normally when sign-in expires.
 
 Changes to optional local capture hooks remain subject to Codex's native trust
 review. Installing or updating the package never opts a computer into capture.

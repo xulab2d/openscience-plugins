@@ -1,0 +1,13 @@
+# OpenScience Remote for Claude Code
+
+Install from the shared marketplace with `/plugin install openscience-remote --marketplace xulab2d/openscience-plugins`. Connect the OpenScience server and use your normal lab browser sign-in. This plugin uses the lab host for shared context, original evidence, figures, and shared skill updates; clients do not need an AWS account, a local lab corpus, or a Google Drive plugin.
+
+The native `artifact_transfer` tool handles an explicitly requested original file upload or exact local download. The model passes the operation and selected local path, while the helper and the saved native MCP connection transfer the bytes privately. Only the verified checksum, size, and local path return to the conversation. Existing originals are preserved; an existing destination with different bytes is rejected. Interrupted transfers retain a checkpoint and resume when the identical request is repeated. Drive sync still pending is reported as pending.
+
+The optional deterministic command is `/openscience-file {"operation":"upload","path":"/absolute/path/figure.png","project_id":"known-project"}`. For downloads, use `operation: "download"`, a new local `path`, and the existing original artifact's `sha256`.
+
+Signing into OpenScience does not itself grant native tool permissions. If a requested transfer reports missing permission, open `/permissions` and review Allow rules for only the operation you authorized. A download uses `mcp__plugin_openscience-remote_openscience__read_artifact`. An upload uses the same prefix followed by `begin_upload`, `upload_status`, `upload_chunk`, and `complete_upload`. Then retry the identical transfer. Follow organization policy and existing denials; the helper never grants these rules. An automatic interactive approval prompt has not been verified.
+
+Artifact transfer requires local Python 3.9+ and Claude Code mod execution under the user's normal trust and organization policy. Exact original upload and download were verified on macOS with Claude Code 2.1.312, including a multi-block transfer with no model turn. Claude Code alone does not guarantee Python is installed, and Windows transfer support is not claimed. Ordinary remote context and authenticated browser downloads do not need that local helper. Never change permissions or install a runtime automatically to bypass a limitation.
+
+Installing this plugin does not enroll conversation capture or read transcripts. The transfer helper accepts only explicitly requested artifacts. It does not access credentials, start a new model turn, scan directories, or send messages. Native OAuth stays inside Claude Code. Local pending checkpoints are stored under `~/.openscience-claude-transfers`.

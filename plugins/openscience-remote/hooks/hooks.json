@@ -1,0 +1,4 @@
+{
+  "description": "User-requested original artifact transfers; no automatic capture",
+  "modules": ["./register.js"]
+}

@@ -44,7 +44,13 @@ Complete browser sign-in with your authorized lab email. Use the same Claude acc
 
 The Codex Git installation above does not itself create an account-level ChatGPT plugin. In [ChatGPT Plugins](https://chatgpt.com/plugins), choose **Add → Add custom MCP server**, name it **OpenScience Remote**, use `https://mcp.xu-lab.net/mcp`, and keep **OAuth** authentication. The server advertises Dynamic Client Registration; no client key needs to be copied. Create the plugin and sign in with your authorized lab email.
 
-Use the same ChatGPT account on your phone and select the installed account plugin. Availability also depends on your account/workspace's plugin permissions. [Custom MCP setup](https://developers.openai.com/api/docs/guides/custom-mcp-server) · [Plugin availability across devices](https://learn.chatgpt.com/docs/plugins).
+Do this in your own ChatGPT account—the one you use on your phone. Your ChatGPT account and your OpenScience lab identity are separate: use your approved lab email at the OpenScience sign-in screen. A connection installed in the shared lab ChatGPT account does not install it in anyone's personal account. Then select OpenScience Remote on your phone using that same personal ChatGPT account. Availability also depends on your account/workspace's plugin permissions. [Custom MCP setup](https://developers.openai.com/api/docs/guides/custom-mcp-server) · [Plugin availability across devices](https://learn.chatgpt.com/docs/plugins).
+
+### Stanford Claude accounts
+
+Stanford's managed Claude workspace requires an administrator to add a new remote connector. Installing the plugin's skills does not bypass that requirement. Request **OpenScience Remote**, URL `https://mcp.xu-lab.net/mcp`, with **OAuth → Register automatically** through [Stanford's Claude connector request](https://stanford.service-now.com/it_services?id=sc_cat_item&sys_id=4a36a9363b148bd08b33f9ac24e45abe). Once approved, lab members connect individually with their authorized lab identity; Stanford-wide installation does not grant Stanford-wide access to lab data. See [Stanford's connector process](https://uit.stanford.edu/ai/connectors).
+
+Claude Code connects separately using the installation above. Its [Remote Control](https://code.claude.com/docs/en/remote-control) can retain the local MCP connection on web and phone if the account has Claude Code access and Stanford enables Remote Control. This is a running computer session, not a replacement for an approved connector in normal Claude chat. Account eligibility and Remote Control must be checked separately from OpenScience OAuth.
 
 ## Use
 

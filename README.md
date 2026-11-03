@@ -91,9 +91,17 @@ Sign in with your lab email. On your phone, use the same Claude account and enab
 
 **Stanford-managed Claude accounts** need an administrator to approve the connector. Request **OpenScience Remote** (`https://mcp.xu-lab.net/mcp`, OAuth → Register automatically) through [Stanford's connector request form](https://stanford.service-now.com/it_services?id=sc_cat_item&sys_id=4a36a9363b148bd08b33f9ac24e45abe). Approval doesn't grant access to lab data; each member still signs in. Claude Code connects separately, as described above.
 
-## ChatGPT (web, phone)
+## ChatGPT (web only)
 
-In [ChatGPT Plugins](https://chatgpt.com/plugins), choose **Add → Add custom MCP server**. Name it **OpenScience Remote**, use `https://mcp.xu-lab.net/mcp`, and keep **OAuth**. Sign in with your lab email. Do this in your own ChatGPT account (the one on your phone), not the shared lab account. Installing the plugin in Codex doesn't add it to ChatGPT.
+On chatgpt.com, go to [Plugins](https://chatgpt.com/plugins) and choose **+ → Add custom MCP server**. Name it **OpenScience Remote**, use `https://mcp.xu-lab.net/mcp`, and keep **OAuth**. Sign in with your lab email. Do this in your own ChatGPT account, not the shared lab account. Installing the plugin in Codex doesn't add it to ChatGPT.
+
+What your plan allows ([OpenAI](https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt)):
+
+- **Business, Enterprise/Edu:** full access, including saving observations and corrections. On Enterprise/Edu (including Stanford-managed ChatGPT), an admin has to grant you permission to add custom MCP servers.
+- **Pro:** read and search only.
+- **Plus, Free:** not listed as supported.
+
+Custom MCP servers don't work in the ChatGPT phone app. To use OpenScience from a phone, use Claude Code with [Remote Control](https://code.claude.com/docs/en/remote-control), or the Claude connector above.
 
 ## What to expect
 

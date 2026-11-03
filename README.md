@@ -4,6 +4,20 @@ Connects Claude Code, Codex, Claude and ChatGPT to the Xu Lab's shared OpenScien
 
 Lab records and credentials are never stored in this public repository.
 
+## Connect
+
+Once the admin has added your email, paste this into Claude Code or Codex:
+
+```text
+Connect me to the Xu Lab OpenScience server (https://mcp.xu-lab.net/mcp). Run the commands yourself.
+- If you are Claude Code: run `claude plugin install openscience-remote --marketplace xulab2d/openscience-plugins`. Then tell me to restart Claude Code, type /mcp, select plugin:openscience-remote:openscience, choose Authenticate, and sign in with my lab email.
+- If you are Codex: run `codex plugin marketplace add xulab2d/openscience-plugins`, then `codex plugin add openscience-validation@xu-lab-remote`, then `codex mcp login openscience_validation`, which opens my browser to sign in with my lab email. When it finishes, run `codex mcp list` and confirm openscience_validation shows OAuth.
+```
+
+Codex finishes on its own. Claude Code can't open the sign-in itself, so it hands you the last step: restart, then `/mcp` → **Authenticate**. If sign-in succeeds but OpenScience refuses the connection, your email isn't on the list yet. Ask the admin to add it.
+
+The sections below are the same steps done by hand.
+
 ## Claude Code
 
 Requires a current Claude Code (validated on 2.1.312 and later).

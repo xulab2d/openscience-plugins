@@ -10,7 +10,7 @@ Once the admin has added your email, paste this into Claude Code or Codex:
 
 ```text
 Connect me to the Xu Lab OpenScience server (https://mcp.xu-lab.net/mcp). Run the commands yourself.
-- If you are Claude Code: run `claude plugin install openscience-remote --marketplace xulab2d/openscience-plugins`. Then tell me to restart Claude Code, type /mcp, select plugin:openscience-remote:openscience, choose Authenticate, and sign in with my lab email.
+- If you are Claude Code: run `claude plugin install openscience-remote --marketplace xulab2d/openscience-plugins`. Add `mcp__plugin_openscience-remote_openscience` and `mcp__openscience-remote` to `permissions.allow` in `~/.claude/settings.json`, keeping any rules already there. Then tell me to restart Claude Code, type /mcp, select plugin:openscience-remote:openscience, choose Authenticate, and sign in with my lab email.
 - If you are Codex: run `codex plugin marketplace add xulab2d/openscience-plugins`, then `codex plugin add openscience-validation@xu-lab-remote`, then `codex mcp login openscience_validation`, which opens my browser to sign in with my lab email. When it finishes, run `codex mcp list` and confirm openscience_validation shows OAuth.
 ```
 
@@ -30,15 +30,28 @@ Requires a current Claude Code (validated on 2.1.312 and later).
 
    From inside a session, the equivalent is `/plugin marketplace add xulab2d/openscience-plugins`, then `/plugin install openscience-remote@xu-lab-claude`.
 
-2. Restart Claude Code.
-3. Run `/mcp`, select **plugin:openscience-remote:openscience**, choose **Authenticate**, and sign in with your lab email in the browser.
-4. Check the connection by asking: *"Run OpenScience sync_status."* A healthy result shows `authentication.kind: cloudflare_access`, `last_sync.ok: true`, and a generation and record count.
+2. Allow the OpenScience tools, so reads, saved observations and file transfers run without a prompt each time. Add both rules to `permissions.allow` in `~/.claude/settings.json`, keeping any rules already there:
+
+   ```json
+   "permissions": {
+     "allow": [
+       "mcp__plugin_openscience-remote_openscience",
+       "mcp__openscience-remote"
+     ]
+   }
+   ```
+
+   The first covers every tool on the OpenScience server, including the ones that write (saving observations, proposing corrections, uploads). The second covers the plugin's own `artifact_transfer` tool. File transfers call the server from inside the plugin and fail without the first rule.
+
+3. Restart Claude Code.
+4. Run `/mcp`, select **plugin:openscience-remote:openscience**, choose **Authenticate**, and sign in with your lab email in the browser.
+5. Check the connection by asking: *"Run OpenScience sync_status."* A healthy result shows `authentication.kind: cloudflare_access`, `last_sync.ok: true`, and a generation and record count.
 
 **Optional: use OpenScience automatically.** The plugin's skill loads for lab questions. To make it unconditional, add this to `~/.claude/CLAUDE.md`:
 
 > For Xu Lab research, materials, experiments, measurements, methods, equipment or lab operations, call OpenScience `sync_status` and `assemble_context` before substantive work.
 
-**File transfers.** Uploading or downloading original files needs Python 3.9+ and was verified on macOS only. Use `/openscience-file {"operation":"upload","path":"/absolute/path/figure.png","project_id":"known-project"}`. For a download, use `"operation":"download"`, a new local `path`, and the original's `sha256`. If a transfer reports a missing permission, allow only the tools it names under `/permissions`, then retry. See [the package README](plugins/openscience-remote/README.md).
+**File transfers.** Uploading or downloading original files needs Python 3.9+ and was verified on macOS only. Use `/openscience-file {"operation":"upload","path":"/absolute/path/figure.png","project_id":"known-project"}`. For a download, use `"operation":"download"`, a new local `path`, and the original's `sha256`. To download a mapped source file such as a Dropbox photo, also give `"source":"dropbox"` and its `"relative_path"`, with the `sha256` that `resolve_scientific_file` reports. The bytes go straight to disk and never into the conversation. If a transfer stops, its message names the stage that failed; a missing permission means step 2 above was skipped. See [the package README](plugins/openscience-remote/README.md).
 
 **Updating.** Shared context and skills update on the server, so you don't need to reinstall for them. To update the plugin itself:
 
@@ -105,7 +118,7 @@ Once it's connected, OpenScience works wherever you're signed in to that ChatGPT
 
 ## What to expect
 
-- **Context and skills are live.** New context, shared skills and server improvements arrive through the existing connection, with no sync job or reinstall. Packages: Claude Code 0.2.1, Codex 0.2.0.
+- **Context and skills are live.** New context, shared skills and server improvements arrive through the existing connection, with no sync job or reinstall. Packages: Claude Code 0.2.2, Codex 0.2.0.
 - **Contributions are reviewed before they become canonical.** Observations and proposed corrections are saved under your name as unreviewed records.
 - **There's no instrument authority.** Historical evidence never authorizes operating hardware or establishes live acquisition status.
 - **Conversation capture is off by default.** Installing never captures conversations. Codex includes an optional capture hook that stays inactive until you ask Codex to enable it for named project folders. The Claude Code package has no capture collector.

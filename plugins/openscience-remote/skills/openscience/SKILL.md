@@ -70,6 +70,11 @@ For an explicitly requested artifact upload or exact local download in Claude
 Code, use this plugin's native `mcp__openscience-remote__artifact_transfer` tool.
 Pass `operation`, the exact absolute local `path`, and the existing artifact
 `sha256` for a download; pass a known `project_id` for an upload when relevant.
+To download a mapped source file (for example a Dropbox photo), first call
+`resolve_scientific_file` with `fetch: true` for its `sha256`, then pass `source`,
+`relative_path` and that `sha256` to the same tool. Prefer this over paging
+`read_scientific_file` into the conversation for any file larger than a few KiB.
+A stopped transfer names its stage, such as `server_error (read_artifact)`.
 It transfers bytes through the saved native OpenScience connection and returns
 only verified metadata, keeping file bytes out of the model context. Preserve
 existing originals and use a new destination when different bytes already exist.
@@ -77,11 +82,13 @@ If interrupted or Drive sync is pending, repeat the identical request to resume;
 do not report success until `verified` is true. Never use this tool for credentials,
 conversation capture, unsolicited files, or directory scans. It requires local
 Python 3.9+ and allowed Claude Code mod execution. Signing in does not grant native
-tool permission. If the helper reports missing approval, direct the user to
-`/permissions` to review only the authorized operation's exact Allow rules: the
-prefix `mcp__plugin_openscience-remote_openscience__` followed by `read_artifact`
-for downloads, or `begin_upload`, `upload_status`, `upload_chunk`, and
-`complete_upload` for uploads. Retry the identical transfer after approval.
+tool permission. If the helper reports missing approval, the lab setup step was
+skipped: the lab setup allows `mcp__plugin_openscience-remote_openscience` and
+`mcp__openscience-remote` in `permissions.allow`. Otherwise direct the user to
+review only the authorized operation's exact Allow rules: the prefix
+`mcp__plugin_openscience-remote_openscience__` followed by `read_artifact` or
+`read_scientific_file` for downloads, or `begin_upload`, `upload_status`,
+`upload_chunk`, and `complete_upload` for uploads. Retry the identical transfer after approval.
 Do not promise an automatic prompt, add permissions automatically, override a
 denial or organization policy, or install runtimes automatically. If unavailable, report that limitation and use the
 authenticated browser download link for existing originals. The optional

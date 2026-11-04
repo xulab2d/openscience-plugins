@@ -17,6 +17,9 @@ import sys
 import tempfile
 
 CHUNK_BYTES = 196608
+# Native mod MCP results above ~32 KiB of file bytes exceed Claude Code's tool-result
+# limit and arrive as a saved-file notice, so downloads read 32 KiB pages.
+READ_BYTES = 32768
 STATE = Path.home() / ".openscience-claude-transfers"
 
 
@@ -70,8 +73,20 @@ def action(state, name, arguments):
     state["call"] = {"name": name, "arguments": arguments}
 
 
+REQUEST_KEYS = {"operation", "path", "sha256", "project_id", "source", "relative_path"}
+
+
+def read_call(state, offset):
+    # Source files (e.g. Dropbox) and catalog artifacts share one verified byte path.
+    request = state["request"]
+    if "source" in request:
+        return "read_scientific_file", {"source": request["source"], "relative_path": request["relative_path"],
+                                        "sha256": state["sha256"], "offset": offset, "max_bytes": READ_BYTES}
+    return "read_artifact", {"sha256": state["sha256"], "offset": offset, "max_bytes": READ_BYTES}
+
+
 def prepare(request):
-    if not isinstance(request, dict) or set(request) - {"operation", "path", "sha256", "project_id"}:
+    if not isinstance(request, dict) or set(request) - REQUEST_KEYS:
         raise ValueError("Invalid request")
     operation = request.get("operation")
     if operation not in {"upload", "download"} or not isinstance(request.get("path"), str):
@@ -96,6 +111,16 @@ def prepare(request):
         sha = check_hash(request.get("sha256"))
         clean["sha256"] = sha
         size = None
+        if "source" in request or "relative_path" in request:
+            source, relative = request.get("source"), request.get("relative_path")
+            if (not isinstance(source, str) or not re.fullmatch(r"[A-Za-z0-9_.:-]{1,64}", source)
+                    or not isinstance(relative, str) or not relative or len(relative) > 4096
+                    or relative.startswith("/") or "\x00" in relative
+                    or ".." in Path(relative).parts):
+                raise ValueError("Source download needs a source name and a relative path")
+            clean.update(source=source, relative_path=relative)
+    if operation == "upload" and ("source" in request or "relative_path" in request):
+        raise ValueError("Source paths are download-only")
     identity = hashlib.sha256(json.dumps([clean, sha], sort_keys=True).encode()).hexdigest()
     return identity, {"request": clean, "sha256": sha, "bytes": size, "offset": 0}
 
@@ -166,13 +191,18 @@ def advance(state, identity, response):
             raise ValueError("Remote receipt failed verification")
         verify_original(state)
         state["done"] = True
-    elif name == "read_artifact":
+    elif name in {"read_artifact", "read_scientific_file"}:
         target, partial = Path(state["request"]["path"]), partial_path(state, identity)
-        total, offset = response.get("bytes"), state["offset"]
+        offset = state["offset"]
+        if name == "read_scientific_file":
+            if response.get("encoding") != "base64":
+                raise ValueError("Unexpected source file encoding")
+            total, encoded = response.get("total_bytes"), response.get("data")
+        else:
+            total, encoded = response.get("bytes"), response.get("base64")
         if (response.get("sha256") != state["sha256"] or type(total) is not int or total < 0
                 or state["bytes"] is not None and state["bytes"] != total):
             raise ValueError("Artifact identity or size changed")
-        encoded = response.get("base64")
         if not isinstance(encoded, str) or len(encoded) > CHUNK_BYTES * 4 // 3 + 4:
             raise ValueError("Oversized artifact response")
         chunk = base64.b64decode(encoded, validate=True)
@@ -202,7 +232,7 @@ def advance(state, identity, response):
                     raise ValueError("Destination exists with different bytes") from None
             state["done"] = True
         else:
-            action(state, "read_artifact", {"sha256": state["sha256"], "offset": stop})
+            action(state, *read_call(state, stop))
     else:
         raise ValueError("Unknown transfer phase")
 
@@ -249,7 +279,7 @@ def step(payload, root=STATE):
                 if not partial.exists() and state["offset"] == 0:
                     os.close(os.open(partial, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600))
                 verify_partial(state, partial)
-                action(state, "read_artifact", {"sha256": state["sha256"], "offset": state["offset"]})
+                action(state, *read_call(state, state["offset"]))
         else:
             if payload.get("action_id") != state.get("action_id"):
                 raise ValueError("Stale or concurrent response; retry the original command")

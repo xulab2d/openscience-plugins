@@ -10,8 +10,8 @@ Once the admin has added your email, paste this into Claude Code or Codex:
 
 ```text
 Connect me to the Xu Lab OpenScience server (https://mcp.xu-lab.net/mcp). Run the commands yourself.
-- If you are Claude Code: run `claude plugin install openscience-remote --marketplace xulab2d/openscience-plugins`. Add `mcp__plugin_openscience-remote_openscience` and `mcp__openscience-remote` to `permissions.allow` in `~/.claude/settings.json`, keeping any rules already there. Then tell me to restart Claude Code, type /mcp, select plugin:openscience-remote:openscience, choose Authenticate, and sign in with my lab email.
-- If you are Codex: run `codex plugin marketplace add xulab2d/openscience-plugins`, then `codex plugin add openscience-validation@xu-lab-remote`, then `codex mcp login openscience_validation`, which opens my browser to sign in with my lab email. When it finishes, run `codex mcp list` and confirm openscience_validation shows OAuth.
+- If you are Claude Code: run `claude plugin install openscience-remote --marketplace xulab2d/openscience-plugins`. Add `mcp__plugin_openscience-remote_openscience` and `mcp__openscience-remote` to `permissions.allow` in `~/.claude/settings.json`, keeping any rules already there. In the same file, set `"autoUpdate": true` on the `xu-lab-claude` entry under `extraKnownMarketplaces` (create the entry with source `{"source": "github", "repo": "xulab2d/openscience-plugins"}` if it is missing), keeping everything else. Then tell me to restart Claude Code, type /mcp, select plugin:openscience-remote:openscience, choose Authenticate, and sign in with my lab email.
+- If you are Codex: run `codex plugin marketplace add xulab2d/openscience-plugins`, then `codex plugin add openscience-validation@xu-lab-remote`, then `codex mcp login openscience_validation`, which opens my browser to sign in with my lab email. When it finishes, run `codex mcp list` and confirm openscience_validation shows OAuth. Then add the daily update job from the Codex section of https://github.com/xulab2d/openscience-plugins to my crontab, keeping any existing entries.
 ```
 
 Codex finishes on its own. Claude Code can't open the sign-in itself, so it hands you the last step: restart, then `/mcp` → **Authenticate**. If sign-in succeeds but OpenScience refuses the connection, your email isn't on the list yet. Ask the admin to add it.
@@ -43,9 +43,22 @@ Requires a current Claude Code (validated on 2.1.312 and later).
 
    The first covers every tool on the OpenScience server, including the ones that write (saving observations, proposing corrections, uploads). The second covers the plugin's own `artifact_transfer` tool. File transfers call the server from inside the plugin and fail without the first rule.
 
-3. Restart Claude Code.
-4. Run `/mcp`, select **plugin:openscience-remote:openscience**, choose **Authenticate**, and sign in with your lab email in the browser.
-5. Check the connection by asking: *"Run OpenScience sync_status."* A healthy result shows `authentication.kind: cloudflare_access`, `last_sync.ok: true`, and a generation and record count.
+3. Turn on automatic updates, so plugin changes reach you without reinstalling. In the same file, set `autoUpdate` on the marketplace entry, keeping everything else:
+
+   ```json
+   "extraKnownMarketplaces": {
+     "xu-lab-claude": {
+       "source": {"source": "github", "repo": "xulab2d/openscience-plugins"},
+       "autoUpdate": true
+     }
+   }
+   ```
+
+   Claude Code leaves auto-update off for marketplaces outside Anthropic's own until you turn it on. `/plugin` → **Marketplaces** → **xu-lab-claude** → **Enable auto-update** does the same thing.
+
+4. Restart Claude Code.
+5. Run `/mcp`, select **plugin:openscience-remote:openscience**, choose **Authenticate**, and sign in with your lab email in the browser.
+6. Check the connection by asking: *"Run OpenScience sync_status."* A healthy result shows `authentication.kind: cloudflare_access`, `last_sync.ok: true`, and a generation and record count.
 
 **Optional: use OpenScience automatically.** The plugin's skill loads for lab questions. To make it unconditional, add this to `~/.claude/CLAUDE.md`:
 
@@ -53,7 +66,7 @@ Requires a current Claude Code (validated on 2.1.312 and later).
 
 **File transfers.** Uploading or downloading original files needs Python 3.9+ and was verified on macOS only. Use `/openscience-file {"operation":"upload","path":"/absolute/path/figure.png","project_id":"known-project"}`. For a download, use `"operation":"download"`, a new local `path`, and the original's `sha256`. To download a mapped source file such as a Dropbox photo, also give `"source":"dropbox"` and its `"relative_path"`, with the `sha256` that `resolve_scientific_file` reports. The bytes go straight to disk and never into the conversation. If a transfer stops, its message names the stage that failed; a missing permission means step 2 above was skipped. See [the package README](plugins/openscience-remote/README.md).
 
-**Updating.** Shared context and skills update on the server, so you don't need to reinstall for them. To update the plugin itself:
+**Updating.** Shared context and skills update on the server, so you don't need to reinstall for them. With step 3 done, Claude Code checks for a new plugin version each time it starts, installs it and reloads it for that session. To update right away instead:
 
 ```sh
 claude plugin marketplace update xu-lab-claude
@@ -92,6 +105,15 @@ codex plugin marketplace upgrade xu-lab-remote
 codex plugin add openscience-validation@xu-lab-remote
 ```
 
+Codex has no auto-update setting for marketplaces. To run those two commands every morning with no model call, add a cron job (macOS or Linux):
+
+```sh
+C="$(command -v codex || echo /Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex)"
+(crontab -l 2>/dev/null | grep -v 'xu-lab-remote'; echo "17 9 * * * \"$C\" plugin marketplace upgrade xu-lab-remote >/dev/null 2>&1 && \"$C\" plugin add openscience-validation@xu-lab-remote >/dev/null 2>&1") | crontab -
+```
+
+Run it again to replace the job. Remove it with `crontab -l | grep -v xu-lab-remote | crontab -`. A computer that is asleep at 9:17 skips that day's run.
+
 ## Claude (web, desktop, phone)
 
 Go to **Customize → Connectors → Add → Add custom connector**:
@@ -118,7 +140,7 @@ Once it's connected, OpenScience works wherever you're signed in to that ChatGPT
 
 ## What to expect
 
-- **Context and skills are live.** New context, shared skills and server improvements arrive through the existing connection, with no sync job or reinstall. Packages: Claude Code 0.2.2, Codex 0.2.0.
+- **Context and skills are live.** New context, shared skills and server improvements arrive through the existing connection, with no sync job or reinstall. Plugin updates install themselves once auto-update is on (Claude Code) or the daily job is added (Codex). Packages: Claude Code 0.2.2, Codex 0.2.0.
 - **Contributions are reviewed before they become canonical.** Observations and proposed corrections are saved under your name as unreviewed records.
 - **There's no instrument authority.** Historical evidence never authorizes operating hardware or establishes live acquisition status.
 - **Conversation capture is off by default.** Installing never captures conversations. Codex includes an optional capture hook that stays inactive until you ask Codex to enable it for named project folders. The Claude Code package has no capture collector.
